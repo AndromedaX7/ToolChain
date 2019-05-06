@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SideBar">
+        <attr name="textColor" format="color"/>
+        <attr name="textSize" format="dimension"/>
+        <attr name="selectedColor" format="color"/>
+        <attr name="textDrawMode" format="enum">
+            <enum name="fill" value="0"/>
+            <enum name="stroke" value="1"/>
+            <enum name="stroke_and_fill" value="2"/>
+        </attr>
+    </declare-styleable>
+</resources>
