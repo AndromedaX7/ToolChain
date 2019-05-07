@@ -1,42 +1,46 @@
 package c.feature.dsl.okhttp
 
+import android.util.Log
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
 import java.io.IOException
 
-class OkHttpDSL{
+class OkHttpDSL {
 
-    private val okHttpClient: OkHttpClient = OkHttpClient()
-    val requestData: RequestData = RequestData()
+    companion object {
+        val gson: Gson = Gson();
+    }
+
+    private val okHttpClient = OkHttpClient()
+    val requestDescription = RequestDescription()
     lateinit var request: Request
     operator fun invoke(block: OkHttpDSL.() -> Unit) {
         block();
     }
 
     private fun parsed() {
-        val mediaType: MediaType? = MediaType.parse(requestData.mimeType.values())!!
-        val body: RequestBody = RequestBody.create(mediaType, requestData.body)
+        val mediaType: MediaType? = MediaType.parse(requestDescription.mimeType.values())!!
+        val body: RequestBody = RequestBody.create(mediaType, requestDescription.body)
         val builder: Request.Builder = Request.Builder()
 
 
-        when (requestData.method) {
-
+        when (requestDescription.method) {
             Method.GET ->
-                builder.get().url(requestData.uri + "?${requestData.body}")
+                builder.get().url(requestDescription.uri + "?${requestDescription.body}")
 
             Method.POST ->
-                builder.post(body).url(requestData.uri)
-
-
+                builder.post(body).url(requestDescription.uri)
         }
 
-        builder.addHeader("content-type", requestData.mimeType.values())
-        for (i in requestData.headers)
+        builder.addHeader("content-type", requestDescription.mimeType.values())
+        for (i in requestDescription.headers)
             builder.addHeader(i.key, i.value)
         request = builder.build()
 
@@ -49,11 +53,39 @@ class OkHttpDSL{
                 try {
                     val response = okHttpClient.newCall(it).execute()
                     response.body()?.let { body ->
-                        function(body.string())
+                        withContext(Dispatchers.Main) {
+                            function(body.string())
+                        }
                     }
 
                 } catch (e: IOException) {
                     exception(e)
+                    e.printStackTrace()
+                }
+
+            }
+        }
+    }
+
+    fun <T> callType(type: Class<T>, function: suspend (T) -> Unit, exception: (Throwable) -> Unit) {
+        parsed()
+        request.let {
+            GlobalScope.launch(Dispatchers.IO) {
+                try {
+                    val response = okHttpClient.newCall(it).execute()
+                    response.body()?.let { body ->
+                        val string = body.string()
+                        Log.e("CallType:${requestDescription.uri}", string)
+                        val obj = gson.fromJson<T>(string, type)
+                        withContext(Dispatchers.Main) {
+                            function(obj)
+                        }
+                    }
+
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        exception(e)
+                    }
                     e.printStackTrace()
                 }
 
@@ -68,7 +100,9 @@ class OkHttpDSL{
                 try {
                     val response = okHttpClient.newCall(it).execute()
                     response.body()?.let { body ->
-                        function(body.bytes())
+                        withContext(Dispatchers.Main) {
+                            function(body.bytes())
+                        }
                     }
                 } catch (e: IOException) {
                     exception(e)
@@ -82,13 +116,13 @@ class OkHttpDSL{
 
 }
 
-class RequestData {
+class RequestDescription {
     lateinit var uri: String
     lateinit var method: Method
     var mimeType: MimeType = MimeType.APPLICATION_JSON
     var headers = ArrayList<Header>()
     var body: String = ""
-    operator fun invoke(block: RequestData.() -> Unit) {
+    operator fun invoke(block: RequestDescription.() -> Unit) {
         block()
     }
 }

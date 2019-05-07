@@ -1,1 +1,1 @@
-include ':app', ':common', ':autosize', ':observer', ':RecyclerViewSwipeMenu', ':widget', ':okhttpdsl'
+include ':app', ':common', ':autosize', ':observer', ':RecyclerViewSwipeMenu', ':widget', ':okhttpdsl', ':extension'
