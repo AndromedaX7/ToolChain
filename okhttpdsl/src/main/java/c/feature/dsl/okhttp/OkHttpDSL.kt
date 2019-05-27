@@ -49,12 +49,15 @@ class OkHttpDSL {
     fun callString(function: suspend (String) -> Unit, exception: (Throwable) -> Unit) {
         parsed()
         request.let {
+
             GlobalScope.launch(Dispatchers.IO) {
                 try {
                     val response = okHttpClient.newCall(it).execute()
                     response.body()?.let { body ->
                         withContext(Dispatchers.Main) {
-                            function(body.string())
+                            val string = body.string()
+                            Log.e("response", "url:${requestDescription.uri} content:$string")
+                            function(string)
                         }
                     }
 
@@ -62,7 +65,6 @@ class OkHttpDSL {
                     exception(e)
                     e.printStackTrace()
                 }
-
             }
         }
     }
@@ -114,16 +116,49 @@ class OkHttpDSL {
         }
     }
 
+    fun callString(callString: CallString) {
+        callString({
+            ///////////////
+            callString.callString(it)
+        }, {
+            callString.exception(it)
+        })
+    }
+
+    fun <T> callType(type: Class<T>, callType: CallType<T>) {
+        callType(type, {
+            callType.callType(it)
+        }, {
+            callType.exception(it)
+        })
+    }
+
+    fun callBytes(callByteArray: CallByteArray) {
+        callBytes({
+            callByteArray.callBytes(it)
+        }, {
+            callByteArray.exception(it)
+        })
+    }
+
+
 }
 
 class RequestDescription {
     lateinit var uri: String
-    lateinit var method: Method
+    var method: Method = Method.POST
     var mimeType: MimeType = MimeType.APPLICATION_JSON
     var headers = ArrayList<Header>()
     var body: String = ""
     operator fun invoke(block: RequestDescription.() -> Unit) {
         block()
+    }
+
+    fun set(uri: String, method: Method, mimeType: MimeType, body: String) {
+        this.uri = uri
+        this.mimeType = mimeType
+        this.method = method
+        this.body = body
     }
 }
 
@@ -151,4 +186,24 @@ enum class Method(private val methodValue: String) {
         return methodValue
     }
 
+}
+
+
+interface CallType<T> : CallIo {
+    fun callType(result: T)
+
+}
+
+interface CallString : CallIo {
+    fun callString(result: String)
+
+}
+
+interface CallByteArray : CallIo {
+    fun callBytes(result: ByteArray)
+
+}
+
+interface CallIo {
+    fun exception(throwable: Throwable)
 }

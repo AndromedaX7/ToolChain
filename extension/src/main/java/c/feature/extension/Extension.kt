@@ -5,6 +5,9 @@ import android.graphics.Color
 import android.os.Build
 import android.view.View
 import android.view.WindowManager
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 
 
 fun Activity.transparentStatus() {
@@ -36,4 +39,16 @@ fun Activity.transparentStatus(colorRes: Int) {
             window.statusBarColor = Color.TRANSPARENT;
         }
     }
+}
+
+fun Activity.toast(text: String) {
+    Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
+}
+
+fun Activity.toast(text: String, textSize: Float) {
+    val toast = Toast.makeText(this, text, Toast.LENGTH_SHORT)
+    val linearLayout = toast.view as LinearLayout
+    val childAt = linearLayout.getChildAt(0) as TextView
+    childAt.setTextSize(textSize)
+    toast.show()
 }
