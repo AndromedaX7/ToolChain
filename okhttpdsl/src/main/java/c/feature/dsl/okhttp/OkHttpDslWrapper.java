@@ -24,29 +24,24 @@ public class OkHttpDslWrapper {
     }
 
 
-    private void test() {
-        create("", "", Method.POST, MimeType.APPLICATION_X_FORM_URLENCODED).callType(File.class, new CallType<File>() {
-            @Override
-            public void exception(@NotNull Throwable throwable) {
-
-            }
-
-            @Override
-            public void callType(File result) {
-
-            }
-        });
-
-        create(null, null, null, null).callString(new CallString() {
-            @Override
-            public void callString(@NotNull String result) {
-
-            }
-
-            @Override
-            public void exception(@NotNull Throwable throwable) {
-
-            }
-        });
-    }
+//     private void test() {
+//         create("", "", Method.POST, MimeType.APPLICATION_X_FORM_URLENCODED).callType(File.class, new CallType<File>() {
+//             @Override
+//             public void exception(@NotNull Throwable throwable) {
+//             }
+// 
+//             @Override
+//             public void callType(File result) {
+// 
+//             }
+//         });
+//         create(null, null, null, null).callString(new CallString() {
+//             @Override
+//             public void callString(@NotNull String result) {
+//             }
+//             @Override
+//             public void exception(@NotNull Throwable throwable) {
+//             }
+//         });
+//     }
 }
