@@ -1,1 +1,1 @@
-include ':app', ':common', ':autosize', ':observer', ':RecyclerViewSwipeMenu', ':widget', ':okhttpdsl', ':extension', ':projectwrapper'
+include ':app', ':common', ':autosize', ':observer', ':RecyclerViewSwipeMenu', ':widget', ':okhttpdsl', ':extension', ':projectwrapper',':lib-zxing'
